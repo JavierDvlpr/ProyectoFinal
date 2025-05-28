@@ -1,0 +1,39 @@
+<div class="p-4">
+  <h2 class="text-lg font-semibold text-gray-200 mb-4">{{ title }}</h2>
+
+  <!-- 🎨 Estilos base para campos del formulario -->
+  <style>
+    input, select, textarea {
+      background-color: #1e293b; /* fondo oscuro */
+      color: white;              /* texto blanco */
+      border: 1px solid #334155; /* borde tipo dark-700 */
+      padding: 0.5rem;
+      border-radius: 0.375rem;   /* rounded-md */
+      width: 100%;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #3b82f6; /* azul claro para enfoque */
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+    }
+  </style>
+
+  <form id="modal-form" action="{{ request.path }}" method="POST">
+    {% csrf_token %}
+    <div id="form-errors" class="hidden text-red-500 mb-4"></div>
+
+    <div class="space-y-4">
+      {{ form.as_p }}
+    </div>
+
+    <div class="mt-6 flex justify-end space-x-2">
+      <button type="button" class="modal-close bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded text-sm">
+        Cancelar
+      </button>
+      <button type="submit" class="bg-blue-700 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm">
+        Guardar
+      </button>
+    </div>
+  </form>
+</div>

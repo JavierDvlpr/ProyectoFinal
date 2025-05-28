@@ -1,0 +1,353 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard Clínico</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            dark: {
+              900: '#0f172a',
+              800: '#1e293b',
+              700: '#334155',
+              600: '#475569',
+              500: '#64748b'
+            }
+          }
+        },
+      },
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body class="bg-dark-900 text-gray-100 font-sans">
+
+  <!-- Layout principal -->
+  <div class="min-h-screen flex">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-dark-800 border-r border-dark-700 flex flex-col justify-between">
+      <div class="p-6">
+        <h2 class="text-2xl font-bold mb-6 text-white">🏥 Proyecto Final</h2>
+        <p class="mb-6 text-gray-300">👤 Usuario: {{ user.username }}</p>
+        <nav class="space-y-3">
+          <a href="{% url 'dashboard_reportes' %}" class="block py-3 px-4 bg-dark-700 rounded-lg text-gray-200 hover:bg-dark-600">📈 Reportes</a>
+          <button onclick="openLogoutModal()" class="block py-3 px-4 bg-red-800 rounded-lg hover:bg-red-700 text-gray-200 w-full text-left">
+  🚪 Salir
+</button>
+        </nav>
+      </div>
+      <footer class="p-4 text-sm text-center text-gray-400 border-t border-dark-700">
+        By Javier Castillo y Juan Maturana
+      </footer>
+    </aside>
+
+    <!-- Contenido principal -->
+    <div class="flex-1 flex flex-col">
+      
+      <!-- Header -->
+<header class="bg-dark-800 border-b border-dark-700 text-white py-6 px-8 flex justify-between items-center">
+  <h1 class="text-3xl font-bold">Dashboard Clínico</h1>
+  <div class="flex space-x-4">
+    <a href="{% url 'dashboard_reportes' %}" class="bg-blue-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700">Ver Reportes</a>
+  </div>
+</header>
+
+      <!-- Tablas -->
+      <main class="p-8 space-y-8">
+        
+        <!-- Especialidades -->
+        <section class="bg-dark-800 rounded-lg border border-dark-700">
+          <div class="p-6 border-b border-dark-700 cursor-pointer flex justify-between items-center" onclick="toggleTable('especialidades')">
+            <h2 class="text-xl font-semibold text-white flex items-center">
+              <span class="mr-3">🏥</span>
+              Especialidades
+            </h2>
+            <div class="flex items-center space-x-4">
+              <button data-table="especialidades" class="create-button bg-green-700 hover:bg-green-600 px-4 py-2 rounded-lg text-sm font-medium">
+                + Nueva
+              </button>
+              <span id="especialidades-arrow" class="text-gray-400 text-xl">▼</span>
+            </div>
+          </div>
+          <div id="especialidades-table" class="hidden">
+            <table class="w-full">
+              <thead class="bg-dark-700">
+                <tr>
+                  <th class="p-4 text-left text-gray-300 font-semibold">Nombre</th>
+                  <th class="p-4 text-left text-gray-300 font-semibold">Acciones</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-dark-700">
+                {% for e in especialidades %}
+                  <tr class="hover:bg-dark-700">
+                    <td class="p-4 text-gray-200">{{ e.nombre }}</td>
+                    <td class="p-4">
+                      <div class="flex space-x-2">
+                        <button data-table="especialidades" data-id="{{ e.id }}" data-url="{% url 'especialidad_update' e.id %}" class="edit-button bg-blue-700 hover:bg-blue-600 px-3 py-1 rounded text-sm">
+                          Editar
+                        </button>
+                        <button data-table="especialidades" data-id="{{ e.id }}" data-url="{% url 'especialidad_delete' e.id %}" class="delete-button bg-red-700 hover:bg-red-600 px-3 py-1 rounded text-sm">
+                          Eliminar
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="2" class="p-4 text-gray-400 text-center">No hay especialidades registradas.</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Médicos -->
+        <section class="bg-dark-800 rounded-lg border border-dark-700">
+          <div class="p-6 border-b border-dark-700 cursor-pointer flex justify-between items-center" onclick="toggleTable('medicos')">
+            <h2 class="text-xl font-semibold text-white flex items-center">
+              <span class="mr-3">👨‍⚕️</span>
+              Médicos
+            </h2>
+            <div class="flex items-center space-x-4">
+              <button data-table="medicos" class="create-button bg-green-700 hover:bg-green-600 px-4 py-2 rounded-lg text-sm font-medium">
+                + Nuevo
+              </button>
+              <span id="medicos-arrow" class="text-gray-400 text-xl">▼</span>
+            </div>
+          </div>
+          <div id="medicos-table" class="hidden">
+            <table class="w-full">
+              <thead class="bg-dark-700">
+                <tr>
+                  <th class="p-4 text-left text-gray-300 font-semibold">Nombre</th>
+                  <th class="p-4 text-left text-gray-300 font-semibold">Especialidad</th>
+                  <th class="p-4 text-left text-gray-300 font-semibold">Acciones</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-dark-700">
+                {% for m in medicos %}
+                  <tr class="hover:bg-dark-700">
+                    <td class="p-4 text-gray-200">{{ m.nombre }}</td>
+                    <td class="p-4 text-gray-200">{{ m.especialidad }}</td>
+                    <td class="p-4">
+                      <div class="flex space-x-2">
+                        <button data-table="medicos" data-id="{{ m.id }}" data-url="{% url 'medico_update' m.id %}" class="edit-button bg-blue-700 hover:bg-blue-600 px-3 py-1 rounded text-sm">
+                          Editar
+                        </button>
+                        <button data-table="medicos" data-id="{{ m.id }}" data-url="{% url 'medico_delete' m.id %}" class="delete-button bg-red-700 hover:bg-red-600 px-3 py-1 rounded text-sm">
+                          Eliminar
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="3" class="p-4 text-gray-400 text-center">No hay médicos registrados.</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Pacientes -->
+        <section class="bg-dark-800 rounded-lg border border-dark-700">
+          <div class="p-6 border-b border-dark-700 cursor-pointer flex justify-between items-center" onclick="toggleTable('pacientes')">
+            <h2 class="text-xl font-semibold text-white flex items-center">
+              <span class="mr-3">🧑‍⚕️</span>
+              Pacientes
+            </h2>
+            <div class="flex items-center space-x-4">
+              <button data-table="pacientes" class="create-button bg-green-700 hover:bg-green-600 px-4 py-2 rounded-lg text-sm font-medium">
+                + Nuevo
+              </button>
+              <span id="pacientes-arrow" class="text-gray-400 text-xl">▼</span>
+            </div>
+          </div>
+          <div id="pacientes-table" class="hidden">
+            <table class="w-full">
+              <thead class="bg-dark-700">
+                <tr>
+                  <th class="p-4 text-left text-gray-300 font-semibold">Nombre</th>
+                  <th class="p-4 text-left text-gray-300 font-semibold">Cédula</th>
+                  <th class="p-4 text-left text-gray-300 font-semibold">Acciones</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-dark-700">
+                {% for p in pacientes %}
+                  <tr class="hover:bg-dark-700">
+                    <td class="p-4 text-gray-200">{{ p.nombre }}</td>
+                    <td class="p-4 text-gray-200">{{ p.cedula }}</td>
+                    <td class="p-4">
+                      <div class="flex space-x-2">
+                        <button data-table="pacientes" data-id="{{ p.id }}" data-url="{% url 'paciente_update' p.id %}" class="edit-button bg-blue-700 hover:bg-blue-600 px-3 py-1 rounded text-sm">
+                          Editar
+                        </button>
+                        <button data-table="pacientes" data-id="{{ p.id }}" data-url="{% url 'paciente_delete' p.id %}" class="delete-button bg-red-700 hover:bg-red-600 px-3 py-1 rounded text-sm">
+                          Eliminar
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="3" class="p-4 text-gray-400 text-center">No hay pacientes registrados.</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Citas -->
+        <section class="bg-dark-800 rounded-lg border border-dark-700">
+          <div class="p-6 border-b border-dark-700 cursor-pointer flex justify-between items-center" onclick="toggleTable('citas')">
+            <h2 class="text-xl font-semibold text-white flex items-center">
+              <span class="mr-3">📅</span>
+              Citas
+            </h2>
+            <div class="flex items-center space-x-4">
+              <button data-table="citas" class="create-button bg-green-700 hover:bg-green-600 px-4 py-2 rounded-lg text-sm font-medium">
+                + Nueva
+              </button>
+              <span id="citas-arrow" class="text-gray-400 text-xl">▼</span>
+            </div>
+          </div>
+          <div id="citas-table" class="hidden">
+            <table class="w-full">
+              <thead class="bg-dark-700">
+                <tr>
+                  <th class="p-4 text-left text-gray-300 font-semibold">Fecha</th>
+                  <th class="p-4 text-left text-gray-300 font-semibold">Hora</th>
+                  <th class="p-4 text-left text-gray-300 font-semibold">Paciente</th>
+                  <th class="p-4 text-left text-gray-300 font-semibold">Médico</th>
+                  <th class="p-4 text-left text-gray-300 font-semibold">Acciones</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-dark-700">
+                {% for c in citas %}
+                  <tr class="hover:bg-dark-700">
+                    <td class="p-4 text-gray-200">{{ c.fecha }}</td>
+                    <td class="p-4 text-gray-200">{{ c.hora }}</td>
+                    <td class="p-4 text-gray-200">{{ c.paciente }}</td>
+                    <td class="p-4 text-gray-200">{{ c.medico }}</td>
+                    <td class="p-4">
+                      <div class="flex space-x-2">
+                        <button data-table="citas" data-id="{{ c.id }}" data-url="{% url 'cita_update' c.id %}" class="edit-button bg-blue-700 hover:bg-blue-600 px-3 py-1 rounded text-sm">
+                          Editar
+                        </button>
+                        <button data-table="citas" data-id="{{ c.id }}" data-url="{% url 'cita_delete' c.id %}" class="delete-button bg-red-700 hover:bg-red-600 px-3 py-1 rounded text-sm">
+                          Eliminar
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="5" class="p-4 text-gray-400 text-center">No hay citas agendadas.</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Recetas -->
+        <section class="bg-dark-800 rounded-lg border border-dark-700">
+          <div class="p-6 border-b border-dark-700 cursor-pointer flex justify-between items-center" onclick="toggleTable('recetas')">
+            <h2 class="text-xl font-semibold text-white flex items-center">
+              <span class="mr-3">💊</span>
+              Recetas
+            </h2>
+            <div class="flex items-center space-x-4">
+              <button data-table="recetas" class="create-button bg-green-700 hover:bg-green-600 px-4 py-2 rounded-lg text-sm font-medium">
+                + Nueva
+              </button>
+              <span id="recetas-arrow" class="text-gray-400 text-xl">▼</span>
+            </div>
+          </div>
+          <div id="recetas-table" class="hidden">
+            <table class="w-full">
+              <thead class="bg-dark-700">
+                <tr>
+                  <th class="p-4 text-left text-gray-300 font-semibold">Descripción</th>
+                  <th class="p-4 text-left text-gray-300 font-semibold">ID Cita</th>
+                  <th class="p-4 text-left text-gray-300 font-semibold">Acciones</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-dark-700">
+                {% for r in recetas %}
+                  <tr class="hover:bg-dark-700">
+                    <td class="p-4 text-gray-200">{{ r.descripcion }}</td>
+                    <td class="p-4 text-gray-200">{{ r.cita.id }}</td>
+                    <td class="p-4">
+                      <div class="flex space-x-2">
+                        <button data-table="recetas" data-id="{{ r.id }}" data-url="{% url 'receta_update' r.id %}" class="edit-button bg-blue-700 hover:bg-blue-600 px-3 py-1 rounded text-sm">
+                          Editar
+                        </button>
+                        <button data-table="recetas" data-id="{{ r.id }}" data-url="{% url 'receta_delete' r.id %}" class="delete-button bg-red-700 hover:bg-red-600 px-3 py-1 rounded text-sm">
+                          Eliminar
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="3" class="p-4 text-gray-400 text-center">No hay recetas disponibles.</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Modal Universal -->
+  <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+    <div class="bg-dark-800 rounded-lg border border-dark-700 p-6 w-full max-w-md mx-4">
+      <div id="modal-content"></div>
+    </div>
+  </div>
+  <!-- Modal de Confirmación de Logout -->
+<div id="logoutModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
+  <div class="bg-dark-800 p-6 rounded-lg shadow-lg w-full max-w-md">
+    <h2 class="text-xl font-bold text-white mb-4">¿Cerrar sesión?</h2>
+    <p class="text-gray-300 mb-6">¿Estás seguro de que deseas cerrar sesión?</p>
+    <form action="{% url 'logout' %}" method="post" class="flex justify-end gap-4">
+      {% csrf_token %}
+      <button type="button" onclick="closeLogoutModal()" class="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded text-sm text-white">
+        Cancelar
+      </button>
+      <button type="submit" class="px-4 py-2 bg-red-700 hover:bg-red-600 rounded text-sm text-white">
+        Cerrar sesión
+      </button>
+    </form>
+  </div>
+</div>
+ <script>
+  function openLogoutModal() {
+    document.getElementById('logoutModal').classList.remove('hidden');
+  }
+
+  function closeLogoutModal() {
+    document.getElementById('logoutModal').classList.add('hidden');
+  }
+</script>
+
+
+  <script src="{% static 'js/modal.js' %}"></script>
+</body>
+</html>

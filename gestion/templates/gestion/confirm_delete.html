@@ -1,0 +1,14 @@
+<form id="modal-form" method="POST" action="">
+    {% csrf_token %}
+    <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-semibold text-white">{{ title }}</h3>
+        <button type="button" class="modal-close text-gray-400 hover:text-white text-xl">&times;</button>
+    </div>
+    <div class="space-y-4">
+        <p class="text-gray-300">¿Estás seguro de que deseas eliminar a {{ object }}?</p>
+    </div>
+    <div class="flex justify-end space-x-3 mt-6">
+        <button type="button" class="modal-close px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-white">Cancelar</button>
+        <button type="submit" class="px-4 py-2 bg-red-700 hover:bg-red-600 rounded-lg text-white">Eliminar</button>
+    </div>
+</form>

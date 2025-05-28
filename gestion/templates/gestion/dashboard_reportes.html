@@ -1,0 +1,171 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reportes Clínicos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            dark: {
+              900: '#0f172a',
+              800: '#1e293b',
+              700: '#334155',
+              600: '#475569',
+              500: '#64748b'
+            }
+          }
+        },
+      },
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body class="bg-dark-900 text-gray-100 font-sans">
+  {% csrf_token %}
+
+  <!-- Layout principal -->
+  <div class="min-h-screen flex">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-dark-800 border-r border-dark-700 flex flex-col justify-between">
+      <div class="p-6">
+        <h2 class="text-2xl font-bold mb-6 text-white">🏥 Proyecto Final</h2>
+        <p class="mb-6 text-gray-300">👤 Usuario: {{ user.username }}</p>
+        <nav class="space-y-3">
+          <a href="{% url 'dashboard' %}" class="block py-3 px-4 bg-dark-700 rounded-lg text-gray-200 hover:bg-dark-600">📊 Dashboard</a>
+          <a href="{% url 'dashboard_reportes' %}" class="block py-3 px-4 bg-blue-800 rounded-lg text-white hover:bg-blue-700">📈 Reportes</a>
+          <button onclick="openLogoutModal()" class="block py-3 px-4 bg-red-800 rounded-lg hover:bg-red-700 text-gray-200 w-full text-left">
+  🚪 Salir
+</button>
+        </nav>
+      </div>
+      <footer class="p-4 text-sm text-center text-gray-400 border-t border-dark-700">
+        By Javier Castillo y Juan Maturana
+      </footer>
+    </aside>
+
+    <!-- Contenido principal -->
+    <div class="flex-1 flex flex-col">
+      
+      <!-- Header -->
+      <header class="bg-dark-800 border-b border-dark-700 text-white py-6 px-8 flex justify-between items-center">
+        <h1 class="text-3xl font-bold">Reportes Clínicos</h1>
+        <a href="{% url 'dashboard' %}" class="bg-blue-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700">Volver al Dashboard</a>
+      </header>
+
+      <!-- Reportes -->
+      <main class="p-8 space-y-8">
+        <section class="bg-dark-800 rounded-lg border border-dark-700">
+          <div class="p-6">
+            <h2 class="text-xl font-semibold text-white flex items-center mb-4">
+              <span class="mr-3">📈</span>
+              Lista de Reportes
+            </h2>
+            <table class="w-full">
+              <thead class="bg-dark-700">
+                <tr>
+                  <th class="p-4 text-left text-gray-300 font-semibold">Nombre</th>
+                  <th class="p-4 text-left text-gray-300 font-semibold">Descripción</th>
+                  <th class="p-4 text-left text-gray-300 font-semibold">Acciones</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-dark-700">
+                {% for reporte in reportes %}
+                  <tr class="hover:bg-dark-700">
+                    <td class="p-3 text-gray-200">{{ reporte.nombre }}</td>
+                    <td class="p-3 text-gray-200">{{ reporte.descripcion }}</td>
+                    <td class="p-3">
+                      <button data-reporte-id="{{ reporte.id }}" data-requiere-fecha="{% if 'Citas por Fecha' in reporte.nombre %}true{% else %}false{% endif %}" class="ejecutar-reporte bg-blue-700 hover:bg-blue-600 px-3 py-1 rounded text-sm">
+                        Ejecutar
+                      </button>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Resultados de Reportes -->
+        {% for reporte in reportes %}
+          <section class="bg-dark-800 rounded-lg border border-dark-700">
+            <div class="p-6 border-b border-dark-700 cursor-pointer flex justify-between items-center" onclick="toggleReporte('reporte-{{ reporte.id }}')">
+              <h2 class="text-xl font-semibold text-white flex items-center">
+                <span class="mr-3">📊</span>
+                Resultados: {{ reporte.nombre }}
+              </h2>
+              <span id="reporte-{{ reporte.id }}-arrow" class="text-gray-400 text-xl">▼</span>
+            </div>
+            <div id="reporte-{{ reporte.id }}-table" class="table-container hidden">
+              {% if "Citas por Fecha" in reporte.nombre %}
+                <div class="p-4">
+                  <form id="fecha-form-{{ reporte.id }}" class="mb-4">
+                    <label for="fecha-{{ reporte.id }}" class="block text-sm font-medium text-gray-300">Seleccionar Fecha (YYYY-MM-DD):</label>
+                    <input type="date" id="fecha-{{ reporte.id }}" name="fecha" class="mt-1 p-2 bg-dark-700 text-gray-200 rounded w-full max-w-xs" required>
+                    <button type="submit" class="mt-2 bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded text-sm">Ejecutar con Fecha</button>
+                  </form>
+                </div>
+              {% endif %}
+              <div class="p-4">
+                <div class="mb-4">
+                  <h3 class="text-sm font-medium text-gray-300">Exportar Reporte:</h3>
+                  <button data-reporte-id="{{ reporte.id }}" class="export-pdf export-btn bg-blue-700 hover:bg-blue-600 px-3 py-1 rounded text-sm mr-2" disabled>
+                    📄 Exportar PDF
+                  </button>
+                  <button data-reporte-id="{{ reporte.id }}" class="export-excel export-btn bg-green-700 hover:bg-green-600 px-3 py-1 rounded text-sm" disabled>
+                    📊 Exportar Excel
+                  </button>
+                </div>
+                <div id="reporte-{{ reporte.id }}-results" class="p-4">
+                  <p class="text-gray-400">Ejecute el reporte para ver los resultados.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+        {% endfor %}
+      </main>
+    </div>
+  </div>
+
+  <!-- Indicador de carga -->
+  <div id="loading" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div class="bg-dark-800 p-4 rounded-lg text-white">
+      Generando archivo...
+    </div>
+  </div>
+  <!-- Modal de Confirmación de Logout -->
+<div id="logoutModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
+  <div class="bg-dark-800 p-6 rounded-lg shadow-lg w-full max-w-md">
+    <h2 class="text-xl font-bold text-white mb-4">¿Cerrar sesión?</h2>
+    <p class="text-gray-300 mb-6">¿Estás seguro de que deseas cerrar sesión?</p>
+    <form action="{% url 'logout' %}" method="post" class="flex justify-end gap-4">
+      {% csrf_token %}
+      <button type="button" onclick="closeLogoutModal()" class="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded text-sm text-white">
+        Cancelar
+      </button>
+      <button type="submit" class="px-4 py-2 bg-red-700 hover:bg-red-600 rounded text-sm text-white">
+        Cerrar sesión
+      </button>
+    </form>
+  </div>
+</div>
+<script>
+  function openLogoutModal() {
+    document.getElementById('logoutModal').classList.remove('hidden');
+  }
+
+  function closeLogoutModal() {
+    document.getElementById('logoutModal').classList.add('hidden');
+  }
+</script>
+  <script src="{% static 'js/reportes.js' %}"></script>
+</body>
+</html>
